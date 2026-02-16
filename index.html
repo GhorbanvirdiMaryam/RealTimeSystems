@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Real-Time Systems</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-color: #fcfcfc;
+      --text-dark: #333;
+      --accent: #b8d8d8;
+      --border: #eeeeee;
+      --secondary-text: #7f8c8d;
+    }
+
+    * { box-sizing: border-box; }
+    
+    body {
+      margin: 0;
+      font-family: "Inter", sans-serif;
+      color: var(--text-dark);
+      background-color: var(--bg-color);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .top-nav-bar {
+      background-color: #b8d8d8;
+      padding: 10px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-weight: 400;
+    }
+
+    .top-nav-bar .links a {
+      text-decoration: none;
+      color: var(--text-dark);
+      margin-right: 25px;
+    }
+
+    /* استایل دهی به لوگوها */
+    .socials {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .socials a {
+      color: var(--text-dark);
+      font-size: 16px;
+      text-decoration: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .socials a:hover {
+      opacity: 0.7;
+    }
+
+    header {
+      text-align: center;
+      padding: 50px 20px 30px;
+      background-color: white;
+    }
+
+    .site-brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 42px;
+      color: var(--accent);
+      margin: 0 0 25px 0;
+      font-weight: 500;
+      letter-spacing: -0.5px;
+    }
+
+    .tagline {
+      max-width: 850px;
+      margin: 0 auto;
+      font-size: 15px;
+      font-style: italic;
+      color: var(--secondary-text);
+      line-height: 1.8;
+      font-weight: 400;
+      border-top: 1px solid #f0f0f0;
+      padding-top: 30px;
+    }
+
+    .main-container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 40px;
+      position: relative;
+      flex: 1;
+    }
+
+    .card-track {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: calc(25% - 15px);
+      gap: 20px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+      padding: 20px 0;
+    }
+
+    .card-track::-webkit-scrollbar { display: none; }
+
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .card:hover { transform: translateY(-5px); }
+
+    .cover {
+      width: 100%;
+      aspect-ratio: 3/4;
+      background: #f9f9f9;
+      overflow: hidden;
+      display: block;
+    }
+
+    .cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .content { padding: 20px 10px; }
+
+    .pill {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    h2 { font-size: 16px; margin: 0 0 10px; font-weight: 400; color: #333; }
+    .card p { font-size: 12px; color: #777; line-height: 1.4; margin: 0; }
+
+    .nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: white;
+      border: 1px solid #ddd;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .prev { left: -20px; }
+    .next { right: -20px; }
+
+    footer {
+      height: 60px;
+      background-color: #b8d8d8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #555;
+    }
+
+    @media (max-width: 1000px) {
+      .card-track { grid-auto-columns: calc(50% - 10px); }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="top-nav-bar">
+    <div class="links">
+      <a href="#">About</a>
+      <a href="#">Home</a>
+      <a href="#">Contact</a>
+    </div>
+    <div class="socials">
+      <a href="https://github.com/GhorbanvirdiMaryam" target="_blank" title="GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+      <a href="https://www.linkedin.com/in/maryam-ghorbanvirdi/" target="_blank" title="LinkedIn">
+        <i class="fa-brands fa-linkedin"></i>
+      </a>
+    </div>
+  </div>
+
+  <header>
+    <h1 class="site-brand">Real-Time Systems</h1>
+    <div class="tagline">
+</div>
+  </header>
+
+  <div class="main-container">
+    <button class="nav-btn prev" onclick="scrollGrid(-1)">&#10094;</button>
+    <button class="nav-btn next" onclick="scrollGrid(1)">&#10095;</button>
+    
+    <main class="card-track" id="slider">
+      </main>
+  </div>
+
+  <footer>
+    © Real-Time Systems — 2026
+  </footer>
+
+  <script>
+    const grid = document.getElementById('slider');
+    const parts = [
+      { title: "Real Time Applications", desc: "", img: "part1.png" },
+      { title: "", desc: "", img: "part2.png" },
+      { title: "", desc: "", img: "part3.png" },
+
+    ];
+
+    for (let i = 1; i <= 12; i++) {
+      const data = parts[i-1] || { title: "(Next)", desc: "Coming soon", img: `part${i}.png` };
+      grid.innerHTML += `
+        <a class="card" href="part${i}.html">
+          <div class="cover">
+            <img src="${data.img}" alt="" onerror="this.src='https://via.placeholder.com/300x400?text=Part+${i}'">
+          </div>
+          <div class="content">
+            <span class="pill">Part ${i}</span>
+            <h2>${data.title}</h2>
+            <p>${data.desc}</p>
+          </div>
+        </a>`;
+    }
+
+    function scrollGrid(direction) {
+      const scrollAmount = grid.clientWidth;
+      grid.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+    }
+  </script>
+
+</body>
+</html>
