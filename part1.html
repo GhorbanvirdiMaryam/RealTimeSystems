@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Typical Real-Time Systems</title>
+  <style>
+    body {
+      margin: 24px;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      line-height: 1.6;
+      background: #fff;
+      color: #111;
+    }
+    .content {
+      white-space: pre-wrap;   /* preserves line breaks exactly */
+      word-wrap: break-word;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+<div class="content">
+Real-time systems are the kind of systems where timing is part of correctness—it’s not enough to be right, you must be right on time. They quietly run many parts of daily life, from cars and traffic lights to aircraft control, medical monitoring, and even entertainment. When they work well, we barely notice them, but when they fail, the consequences can be serious. That’s why real-time design focuses not only on responsiveness, but also on validation—rigorously showing that the system meets its intended timing behavior. This chapter starts with a brief overview of typical real-time application classes and the workloads they generate, beginning with simple digital controllers and then moving toward higher-level control and command systems.
+## 1.1 Digital Control
+
+A digital controller becomes meaningful when we think of it as a loop that runs repeatedly in time. In the physical world, the desired behavior of the plant is described by a reference signal (r(t)), while the sensor provides the measured output (y(t)). The controller’s job is to compare these two and react to the difference. That difference is the error (e(t)=r(t)-y(t)). If the error is positive, the plant is below the target; if it is negative, the plant is above the target. The controller uses this error to generate a control command (u(t)) that drives the actuator and pushes the plant toward the desired state.
+
+In a real digital implementation, however, the controller does not continuously see (r(t)) and (y(t)). Instead, it receives sampled values every (T) time units. At times (t=kT), analog-to-digital conversion produces the discrete values (r_k) and (y_k), and the sampled error becomes (e_k=r_k-y_k). This is the key shift from a continuous-time description to a sampled-data description: the controller now operates on sequences ({r_k}), ({y_k}), and ({e_k}) rather than continuous signals.
+
+When the controller is based on PID ideas, it needs not only the current error, but also information about how the error accumulates over time (the integral part) and how fast it changes (the derivative part). In a sampled-data system, integrals and derivatives cannot be used directly in their continuous forms, so we approximate them numerically using the sampled error values. For example, the derivative of (e(t)) over one sampling interval can be approximated by the difference between two consecutive samples divided by the sampling period, ((e_k-e_{k-1})/T). Similarly, the integral of the error can be approximated by numerical integration methods such as the trapezoidal rule, which turns continuous accumulation into a discrete update that depends on recent samples. These approximations convert the PID control law into a discrete-time computation that a processor can execute at every sampling instant.
+
+With one common discretization approach, the controller output can be written as an incremental difference equation. The book gives the following form for the k-th computed output:
+[
+u_k = u_{k-2} + \alpha e_k + \beta e_{k-1} + \gamma e_{k-2}.
+]
+Here, (u_k) is the digital control output at sample (k), and (\alpha), (\beta), and (\gamma) are proportional constants chosen at design time (they depend on how the PID terms are discretized and tuned). The important practical point is that this computation is extremely lightweight: it only requires a few arithmetic operations using stored past values of the error and output. That is why it is well suited for real-time execution, where predictability and bounded computation time matter.
+
+This equation also makes the feedback nature of control very clear. The current output (u_k) depends on current and past measured values because the error (e_k) is computed from (r_k) and (y_k). But the future measured output (y_{k+1}, y_{k+2},\dots) depends on what the controller does now, because the plant responds to the actuator input generated from (u_k). This circular dependency is exactly why we call it a feedback control loop, or simply a loop: measurements influence control actions, and control actions influence future measurements.
+
+In a real-time system, this loop is typically implemented with a periodic timer. The system sets a timer to generate an interrupt every (T) time units. At each interrupt, it performs A/D conversion to obtain the latest sensor measurement, computes the new control output using the discrete control law, and then outputs the command—often converting it back to an analog signal through D/A conversion so the actuator can use it. Once configured, the timer continues producing interrupts at that period until the setting is canceled, which means the controller runs as a permanent periodic task, repeating the sense–compute–actuate cycle indefinitely.
+
+\</div>
+</body>
+</html>
