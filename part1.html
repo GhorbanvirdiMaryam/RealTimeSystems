@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Real-Time Notes Systems</title>
+  <title>Real-Time Systems</title>
   <style>
     body{
       margin:0;
@@ -12,32 +12,60 @@
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
     .wrap{
-      max-width: 900px;
-      margin: 40px auto;
-      padding: 0 16px;
+      max-width: 920px;
+      margin: 52px auto;
+      padding: 0 18px;
     }
     .card{
       background:#fff;
       border:1px solid #e8e8ef;
       border-radius:14px;
-      padding:22px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      padding:26px 24px;
+      box-shadow: 0 10px 26px rgba(0,0,0,0.06);
     }
-    .content{
-      margin:0;
-      white-space: pre-wrap;   /* keep line breaks */
-      word-wrap: break-word;
-      line-height: 1.7;
+    .meta{
+      font-size: 13px;
+      color:#555;
+      margin-bottom: 10px;
+    }
+    h2{
+      margin: 18px 0 10px 0;
+      font-size: 18px;
+      font-weight: 650;
+    }
+    p{
+      margin: 0 0 14px 0;
+      line-height: 1.75;
       font-size: 16px;
+    }
+    .equation{
+      margin: 12px 0 16px 0;
+      border:1px solid #e8e8ef;
+      border-radius: 12px;
+      background:#fafbff;
+      padding: 14px 14px;
+    }
+    .equation pre{
+      margin:0;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-size: 15px;
+      line-height: 1.6;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      color:#111;
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-<pre class="content">
+  <main class="wrap">
+    <article class="card">
+      <div id="content"></div>
+    </article>
+  </main>
+
+  <script id="source" type="text/plain">
 Real-time systems are the kind of systems where timing is part of correctness—it’s not enough to be right, you must be right on time. They quietly run many parts of daily life, from cars and traffic lights to aircraft control, medical monitoring, and even entertainment. When they work well, we barely notice them, but when they fail, the consequences can be serious. That’s why real-time design focuses not only on responsiveness, but also on validation—rigorously showing that the system meets its intended timing behavior. This chapter starts with a brief overview of typical real-time application classes and the workloads they generate, beginning with simple digital controllers and then moving toward higher-level control and command systems.
-## 1.1 Digital Control
+1.1 Digital Control
 
 A digital controller becomes meaningful when we think of it as a loop that runs repeatedly in time. In the physical world, the desired behavior of the plant is described by a reference signal (r(t)), while the sensor provides the measured output (y(t)). The controller’s job is to compare these two and react to the difference. That difference is the error (e(t)=r(t)-y(t)). If the error is positive, the plant is below the target; if it is negative, the plant is above the target. The controller uses this error to generate a control command (u(t)) that drives the actuator and pushes the plant toward the desired state.
 
@@ -55,8 +83,79 @@ This equation also makes the feedback nature of control very clear. The current 
 
 In a real-time system, this loop is typically implemented with a periodic timer. The system sets a timer to generate an interrupt every (T) time units. At each interrupt, it performs A/D conversion to obtain the latest sensor measurement, computes the new control output using the discrete control law, and then outputs the command—often converting it back to an analog signal through D/A conversion so the actuator can use it. Once configured, the timer continues producing interrupts at that period until the setting is canceled, which means the controller runs as a permanent periodic task, repeating the sense–compute–actuate cycle indefinitely.
 
-\</pre>
-    </div>
-  </div>
+\</script>
+
+  <script>
+    const src = document.getElementById('source').textContent.replace(/\r\n/g, '\n');
+    const lines = src.split('\n');
+
+    const out = document.getElementById('content');
+
+    const esc = (s) => s
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
+    let html = '';
+    let para = [];
+    let inEq = false;
+    let eqLines = [];
+
+    function flushPara() {
+      const t = para.join(' ').trim();
+      if (t) html += `<p>${esc(t)}</p>`;
+      para = [];
+    }
+
+    // meta: first non-empty line like "(Page 1)"
+    let i = 0;
+    while (i < lines.length && lines[i].trim() === '') i++;
+    if (i < lines.length && /^\(Page\s+\d+\)\s*$/.test(lines[i].trim())) {
+      html += `<div class="meta">${esc(lines[i].trim())}</div>`;
+      i++;
+    }
+
+    for (; i < lines.length; i++) {
+      const raw = lines[i];
+      const trimmed = raw.trim();
+
+      if (inEq) {
+        if (trimmed === ']') {
+          const box = ['[', ...eqLines, ']'].join('\n');
+          html += `<div class="equation"><pre>${esc(box)}</pre></div>`;
+          inEq = false;
+          eqLines = [];
+        } else {
+          eqLines.push(raw);
+        }
+        continue;
+      }
+
+      if (trimmed === '[') {
+        flushPara();
+        inEq = true;
+        eqLines = [];
+        continue;
+      }
+
+      if (trimmed === '') {
+        flushPara();
+        continue;
+      }
+
+      if (raw.startsWith('## ')) {
+        flushPara();
+        html += `<h2>${esc(raw)}</h2>`;
+        continue;
+      }
+
+      para.push(raw);
+    }
+
+    flushPara();
+    out.innerHTML = html;
+  </script>
 </body>
 </html>
