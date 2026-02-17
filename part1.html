@@ -3,159 +3,66 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Real-Time Systems</title>
-  <style>
-    body{
-      margin:0;
-      background:#f6f7fb;
-      color:#111;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-    }
-    .wrap{
-      max-width: 920px;
-      margin: 52px auto;
-      padding: 0 18px;
-    }
-    .card{
-      background:#fff;
-      border:1px solid #e8e8ef;
-      border-radius:14px;
-      padding:26px 24px;
-      box-shadow: 0 10px 26px rgba(0,0,0,0.06);
-    }
-    .meta{
-      font-size: 13px;
-      color:#555;
-      margin-bottom: 10px;
-    }
-    h2{
-      margin: 18px 0 10px 0;
-      font-size: 18px;
-      font-weight: 650;
-    }
-    p{
-      margin: 0 0 14px 0;
-      line-height: 1.75;
-      font-size: 16px;
-    }
-    .equation{
-      margin: 12px 0 16px 0;
-      border:1px solid #e8e8ef;
-      border-radius: 12px;
-      background:#fafbff;
-      padding: 14px 14px;
-    }
-    .equation pre{
-      margin:0;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      font-size: 15px;
-      line-height: 1.6;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      color:#111;
-    }
-  </style>
-</head>
-<body>
-  <main class="wrap">
-    <article class="card">
-      <div id="content"></div>
-    </article>
-  </main>
-
-  <script id="source" type="text/plain">
-Real-time systems are the kind of systems where timing is part of correctness—it’s not enough to be right, you must be right on time. They quietly run many parts of daily life, from cars and traffic lights to aircraft control, medical monitoring, and even entertainment. When they work well, we barely notice them, but when they fail, the consequences can be serious. That’s why real-time design focuses not only on responsiveness, but also on validation—rigorously showing that the system meets its intended timing behavior. This chapter starts with a brief overview of typical real-time application classes and the workloads they generate, beginning with simple digital controllers and then moving toward higher-level control and command systems.
-1.1 Digital Control
-
-A digital controller becomes meaningful when we think of it as a loop that runs repeatedly in time. In the physical world, the desired behavior of the plant is described by a reference signal (r(t)), while the sensor provides the measured output (y(t)). The controller’s job is to compare these two and react to the difference. That difference is the error (e(t)=r(t)-y(t)). If the error is positive, the plant is below the target; if it is negative, the plant is above the target. The controller uses this error to generate a control command (u(t)) that drives the actuator and pushes the plant toward the desired state.
-
-In a real digital implementation, however, the controller does not continuously see (r(t)) and (y(t)). Instead, it receives sampled values every (T) time units. At times (t=kT), analog-to-digital conversion produces the discrete values (r_k) and (y_k), and the sampled error becomes (e_k=r_k-y_k). This is the key shift from a continuous-time description to a sampled-data description: the controller now operates on sequences ({r_k}), ({y_k}), and ({e_k}) rather than continuous signals.
-
-When the controller is based on PID ideas, it needs not only the current error, but also information about how the error accumulates over time (the integral part) and how fast it changes (the derivative part). In a sampled-data system, integrals and derivatives cannot be used directly in their continuous forms, so we approximate them numerically using the sampled error values. For example, the derivative of (e(t)) over one sampling interval can be approximated by the difference between two consecutive samples divided by the sampling period, ((e_k-e_{k-1})/T). Similarly, the integral of the error can be approximated by numerical integration methods such as the trapezoidal rule, which turns continuous accumulation into a discrete update that depends on recent samples. These approximations convert the PID control law into a discrete-time computation that a processor can execute at every sampling instant.
-
-With one common discretization approach, the controller output can be written as an incremental difference equation. The book gives the following form for the k-th computed output:
-[
-u_k = u_{k-2} + \alpha e_k + \beta e_{k-1} + \gamma e_{k-2}.
-]
-Here, (u_k) is the digital control output at sample (k), and (\alpha), (\beta), and (\gamma) are proportional constants chosen at design time (they depend on how the PID terms are discretized and tuned). The important practical point is that this computation is extremely lightweight: it only requires a few arithmetic operations using stored past values of the error and output. That is why it is well suited for real-time execution, where predictability and bounded computation time matter.
-
-This equation also makes the feedback nature of control very clear. The current output (u_k) depends on current and past measured values because the error (e_k) is computed from (r_k) and (y_k). But the future measured output (y_{k+1}, y_{k+2},\dots) depends on what the controller does now, because the plant responds to the actuator input generated from (u_k). This circular dependency is exactly why we call it a feedback control loop, or simply a loop: measurements influence control actions, and control actions influence future measurements.
-
-In a real-time system, this loop is typically implemented with a periodic timer. The system sets a timer to generate an interrupt every (T) time units. At each interrupt, it performs A/D conversion to obtain the latest sensor measurement, computes the new control output using the discrete control law, and then outputs the command—often converting it back to an analog signal through D/A conversion so the actuator can use it. Once configured, the timer continues producing interrupts at that period until the setting is canceled, which means the controller runs as a permanent periodic task, repeating the sense–compute–actuate cycle indefinitely.
-
-\</script>
+  <title>Real-Time Notes Systems</title>
 
   <script>
-    const src = document.getElementById('source').textContent.replace(/\r\n/g, '\n');
-    const lines = src.split('\n');
-
-    const out = document.getElementById('content');
-
-    const esc = (s) => s
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-
-    let html = '';
-    let para = [];
-    let inEq = false;
-    let eqLines = [];
-
-    function flushPara() {
-      const t = para.join(' ').trim();
-      if (t) html += `<p>${esc(t)}</p>`;
-      para = [];
-    }
-
-    // meta: first non-empty line like "(Page 1)"
-    let i = 0;
-    while (i < lines.length && lines[i].trim() === '') i++;
-    if (i < lines.length && /^\(Page\s+\d+\)\s*$/.test(lines[i].trim())) {
-      html += `<div class="meta">${esc(lines[i].trim())}</div>`;
-      i++;
-    }
-
-    for (; i < lines.length; i++) {
-      const raw = lines[i];
-      const trimmed = raw.trim();
-
-      if (inEq) {
-        if (trimmed === ']') {
-          const box = ['[', ...eqLines, ']'].join('\n');
-          html += `<div class="equation"><pre>${esc(box)}</pre></div>`;
-          inEq = false;
-          eqLines = [];
-        } else {
-          eqLines.push(raw);
-        }
-        continue;
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(','\\)']],
+        displayMath: [['\\[','\\]']]
       }
-
-      if (trimmed === '[') {
-        flushPara();
-        inEq = true;
-        eqLines = [];
-        continue;
-      }
-
-      if (trimmed === '') {
-        flushPara();
-        continue;
-      }
-
-      if (raw.startsWith('## ')) {
-        flushPara();
-        html += `<h2>${esc(raw)}</h2>`;
-        continue;
-      }
-
-      para.push(raw);
-    }
-
-    flushPara();
-    out.innerHTML = html;
+    };
   </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head>
+
+<body style="margin:0;background:#f6f7fb;color:#111;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,'Apple Color Emoji','Segoe UI Emoji';">
+  <main style="max-width:920px;margin:52px auto;padding:0 18px;">
+    <article style="background:#fff;border:1px solid #e8e8ef;border-radius:14px;padding:26px 24px;box-shadow:0 10px 26px rgba(0,0,0,0.06);">
+      
+      <div style="font-size:13px;color:#555;margin-bottom:10px;">(Page 1)</div>
+
+      <p style="margin:0 0 14px 0;line-height:1.75;font-size:16px;">
+        Real-time systems are the kind of systems where timing is part of correctness—it’s not enough to be right, you must be right on time. They quietly run many parts of daily life, from cars and traffic lights to aircraft control, medical monitoring, and even entertainment. When they work well, we barely notice them, but when they fail, the consequences can be serious. That’s why real-time design focuses not only on responsiveness, but also on validation—rigorously showing that the system meets its intended timing behavior. This chapter starts with a brief overview of typical real-time application classes and the workloads they generate, beginning with simple digital controllers and then moving toward higher-level control and command systems.
+      </p>
+
+      <h2 style="margin:18px 0 10px 0;font-size:18px;font-weight:650;">1.1 Digital Control</h2>
+
+      <p style="margin:0 0 14px 0;line-height:1.75;font-size:16px;">
+        A digital controller becomes meaningful when we think of it as a loop that runs repeatedly in time. In the physical world, the desired behavior of the plant is described by a reference signal (\(r(t)\)), while the sensor provides the measured output (\(y(t)\)). The controller’s job is to compare these two and react to the difference. That difference is the error (\(e(t)=r(t)-y(t)\)). If the error is positive, the plant is below the target; if it is negative, the plant is above the target. The controller uses this error to generate a control command (\(u(t)\)) that drives the actuator and pushes the plant toward the desired state.
+      </p>
+
+      <p style="margin:0 0 14px 0;line-height:1.75;font-size:16px;">
+        In a real digital implementation, however, the controller does not continuously see (\(r(t)\)) and (\(y(t)\)). Instead, it receives sampled values every (\(T\)) time units. At times (\(t=kT\)), analog-to-digital conversion produces the discrete values (\(r_k\)) and (\(y_k\)), and the sampled error becomes (\(e_k=r_k-y_k\)). This is the key shift from a continuous-time description to a sampled-data description: the controller now operates on sequences (\(\{r_k\}\)), (\(\{y_k\}\)), and (\(\{e_k\}\)) rather than continuous signals.
+      </p>
+
+      <p style="margin:0 0 14px 0;line-height:1.75;font-size:16px;">
+        When the controller is based on PID ideas, it needs not only the current error, but also information about how the error accumulates over time (the integral part) and how fast it changes (the derivative part). In a sampled-data system, integrals and derivatives cannot be used directly in their continuous forms, so we approximate them numerically using the sampled error values. For example, the derivative of (\(e(t)\)) over one sampling interval can be approximated by the difference between two consecutive samples divided by the sampling period, (\((e_k-e_{k-1})/T\)). Similarly, the integral of the error can be approximated by numerical integration methods such as the trapezoidal rule, which turns continuous accumulation into a discrete update that depends on recent samples. These approximations convert the PID control law into a discrete-time computation that a processor can execute at every sampling instant.
+      </p>
+
+      <p style="margin:0 0 10px 0;line-height:1.75;font-size:16px;">
+        With one common discretization approach, the controller output can be written as an incremental difference equation. The book gives the following form for the k-th computed output:
+      </p>
+
+      <div style="margin:14px 0 18px 0;border:1px solid #e8e8ef;border-radius:12px;background:#fafbff;padding:14px 14px;overflow-x:auto;">
+        \[
+          u_k = u_{k-2} + \alpha e_k + \beta e_{k-1} + \gamma e_{k-2}.
+        \]
+      </div>
+
+      <p style="margin:0 0 14px 0;line-height:1.75;font-size:16px;">
+        Here, (\(u_k\)) is the digital control output at sample (\(k\)), and (\(\alpha\)), (\(\beta\)), and (\(\gamma\)) are proportional constants chosen at design time (they depend on how the PID terms are discretized and tuned). The important practical point is that this computation is extremely lightweight: it only requires a few arithmetic operations using stored past values of the error and output. That is why it is well suited for real-time execution, where predictability and bounded computation time matter.
+      </p>
+
+      <p style="margin:0 0 14px 0;line-height:1.75;font-size:16px;">
+        This equation also makes the feedback nature of control very clear. The current output (\(u_k\)) depends on current and past measured values because the error (\(e_k\)) is computed from (\(r_k\)) and (\(y_k\)). But the future measured output (\(y_{k+1}, y_{k+2},\dots\)) depends on what the controller does now, because the plant responds to the actuator input generated from (\(u_k\)). This circular dependency is exactly why we call it a feedback control loop, or simply a loop: measurements influence control actions, and control actions influence future measurements.
+      </p>
+
+      <p style="margin:0;line-height:1.75;font-size:16px;">
+        In a real-time system, this loop is typically implemented with a periodic timer. The system sets a timer to generate an interrupt every (\(T\)) time units. At each interrupt, it performs A/D conversion to obtain the latest sensor measurement, computes the new control output using the discrete control law, and then outputs the command—often converting it back to an analog signal through D/A conversion so the actuator can use it. Once configured, the timer continues producing interrupts at that period until the setting is canceled, which means the controller runs as a permanent periodic task, repeating the sense–compute–actuate cycle indefinitely.
+      </p>
+
+    </article>
+  </main>
 </body>
 </html>
