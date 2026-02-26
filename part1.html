@@ -1,68 +1,394 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Real-Time Notes Systems</title>
-
-  <script>
-    window.MathJax = {
-      tex: {
-        inlineMath: [['\\(','\\)']],
-        displayMath: [['\\[','\\]']]
-      }
-    };
-  </script>
-  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 1 - Real Time Applications</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- MathJax for Math Equations -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(','\\)']],
+                displayMath: [['\\[','\\]']]
+            }
+        };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    
+    <style>
+        /* ============================================
+           DESIGN PHILOSOPHY: Academic Minimalism
+           Color Palette: Deep Slate-Blue + Warm Amber
+           ============================================ */
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #1a365d;
+            --accent: #d97706;
+            --accent-light: #f59e0b;
+            --background: #fcfcfc;
+            --card-bg: #ffffff;
+            --border: #e5e7eb;
+            --text-dark: #1a365d;
+            --text-light: #6b7280;
+            --transition: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-dark);
+            background-color: var(--background);
+            line-height: 1.6;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Crimson Text', serif;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+        
+        h1 { font-size: 3rem; }
+        h2 { font-size: 2rem; margin-top: 2rem; margin-bottom: 1rem; }
+        h3 { font-size: 1.5rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+        h4 { font-size: 1.25rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+        
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-light);
+            line-height: 1.8;
+        }
+        
+        ul, ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+        }
+        
+        strong {
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+        
+        /* ============================================
+           NAVIGATION BAR
+           ============================================ */
+        
+        nav {
+            border-bottom: 1px solid var(--border);
+            background-color: var(--card-bg);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            transition: color var(--transition);
+            cursor: pointer;
+        }
+        
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+        
+        .nav-socials {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .nav-socials a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-size: 1.25rem;
+            transition: color var(--transition);
+        }
+        
+        .nav-socials a:hover {
+            color: var(--accent);
+        }
+        
+        /* ============================================
+           CHAPTER PAGE LAYOUT
+           ============================================ */
+        
+        .chapter-header {
+            border-bottom: 1px solid var(--border);
+            background-color: var(--card-bg);
+            padding: 3rem 1.5rem;
+        }
+        
+        .chapter-header-content {
+            max-width: 56rem;
+            margin: 0 auto;
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+        
+        .chapter-number-circle {
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Crimson Text', serif;
+            font-weight: bold;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .chapter-header-text h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2.25rem;
+        }
+        
+        .chapter-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+        
+        .chapter-main {
+            max-width: 56rem;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+        
+        .chapter-main h2 {
+            color: var(--text-dark);
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 0.5rem;
+        }
+        
+        .chapter-main h3 {
+            color: var(--text-dark);
+        }
+        
+        .chapter-main h4 {
+            color: var(--accent);
+        }
+        
+        /* Math equation styling */
+        .math-block {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background-color: #fafbff;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            overflow-x: auto;
+        }
+        
+        /* ============================================
+           CHAPTER NAVIGATION FOOTER
+           ============================================ */
+        
+        .chapter-footer {
+            border-top: 1px solid var(--border);
+            background-color: var(--card-bg);
+            margin-top: 4rem;
+        }
+        
+        .chapter-footer-content {
+            max-width: 56rem;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        
+        .chapter-nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .nav-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            background: transparent;
+            color: var(--text-dark);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .nav-button:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        .nav-button.disabled {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .chapter-footer-copyright {
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--text-light);
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+        
+        /* ============================================
+           RESPONSIVE DESIGN
+           ============================================ */
+        
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.5rem; }
+            h3 { font-size: 1.25rem; }
+            
+            .nav-links {
+                gap: 1rem;
+                font-size: 0.75rem;
+            }
+            
+            .chapter-header-content {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            
+            .chapter-header-text h1 {
+                font-size: 1.75rem;
+            }
+            
+            .chapter-nav-buttons {
+                flex-direction: column;
+            }
+            
+            .nav-button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
+<body>
+    <!-- Navigation Bar -->
+    <nav>
+        <div class="nav-container">
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="index.html">About</a>
+                <a href="index.html">Contact</a>
+            </div>
+            <div class="nav-socials">
+                <a href="https://github.com/GhorbanvirdiMaryam" target="_blank" title="GitHub">
+                    <i class="fab fa-github"></i>
+                </a>
+                <a href="https://www.linkedin.com/in/maryam-ghorbanvirdi/" target="_blank" title="LinkedIn">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
 
-<body style="margin:0;background:#f6f7fb;color:#111;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,'Apple Color Emoji','Segoe UI Emoji';">
-  <main style="max-width:920px;margin:52px auto;padding:0 18px;">
-    <article style="background:#fff;border:1px solid #e8e8ef;border-radius:14px;padding:26px 24px;box-shadow:0 10px 26px rgba(0,0,0,0.06);">
-      
-      <div style="font-size:13px;color:#555;margin-bottom:10px;">(Page 1)</div>
+    <!-- Chapter Header -->
+    <div class="chapter-header">
+        <div class="chapter-header-content">
+            <div class="chapter-number-circle">1</div>
+            <div class="chapter-header-text">
+                <p class="chapter-label">Chapter 1</p>
+                <h1>Real Time Applications</h1>
+            </div>
+        </div>
+    </div>
 
-      <p style="margin:0 0 14px 0;line-height:1.75;font-size:16px;">
-        Real-time systems are the kind of systems where timing is part of correctness—it’s not enough to be right, you must be right on time. They quietly run many parts of daily life, from cars and traffic lights to aircraft control, medical monitoring, and even entertainment. When they work well, we barely notice them, but when they fail, the consequences can be serious. That’s why real-time design focuses not only on responsiveness, but also on validation—rigorously showing that the system meets its intended timing behavior. This chapter starts with a brief overview of typical real-time application classes and the workloads they generate, beginning with simple digital controllers and then moving toward higher-level control and command systems.
-      </p>
+    <!-- Chapter Content -->
+    <div class="chapter-main">
+        <div style="font-size:13px;color:#999;margin-bottom:10px;"></div>
 
-      <h2 style="margin:18px 0 10px 0;font-size:18px;font-weight:650;">1.1 Digital Control</h2>
+        <p>Real-time systems are the kind of systems where timing is part of correctness—it's not enough to be right, you must be right on time. They quietly run many parts of daily life, from cars and traffic lights to aircraft control, medical monitoring, and even entertainment. When they work well, we barely notice them, but when they fail, the consequences can be serious. That's why real-time design focuses not only on responsiveness, but also on validation—rigorously showing that the system meets its intended timing behavior. This chapter starts with a brief overview of typical real-time application classes and the workloads they generate, beginning with simple digital controllers and then moving toward higher-level control and command systems.</p>
 
-      <p style="margin:0 0 14px 0;line-height:1.75;font-size:16px;">
-        A digital controller becomes meaningful when we think of it as a loop that runs repeatedly in time. In the physical world, the desired behavior of the plant is described by a reference signal (\(r(t)\)), while the sensor provides the measured output (\(y(t)\)). The controller’s job is to compare these two and react to the difference. That difference is the error (\(e(t)=r(t)-y(t)\)). If the error is positive, the plant is below the target; if it is negative, the plant is above the target. The controller uses this error to generate a control command (\(u(t)\)) that drives the actuator and pushes the plant toward the desired state.
-      </p>
+        <h2>1.1 Digital Control</h2>
 
-      <p style="margin:0 0 14px 0;line-height:1.75;font-size:16px;">
-        In a real digital implementation, however, the controller does not continuously see (\(r(t)\)) and (\(y(t)\)). Instead, it receives sampled values every (\(T\)) time units. At times (\(t=kT\)), analog-to-digital conversion produces the discrete values (\(r_k\)) and (\(y_k\)), and the sampled error becomes (\(e_k=r_k-y_k\)). This is the key shift from a continuous-time description to a sampled-data description: the controller now operates on sequences (\(\{r_k\}\)), (\(\{y_k\}\)), and (\(\{e_k\}\)) rather than continuous signals.
-      </p>
+        <p>A digital controller becomes meaningful when we think of it as a loop that runs repeatedly in time. In the physical world, the desired behavior of the plant is described by a reference signal (\(r(t)\)), while the sensor provides the measured output (\(y(t)\)). The controller's job is to compare these two and react to the difference. That difference is the error (\(e(t)=r(t)-y(t)\)). If the error is positive, the plant is below the target; if it is negative, the plant is above the target. The controller uses this error to generate a control command (\(u(t)\)) that drives the actuator and pushes the plant toward the desired state.</p>
 
-      <p style="margin:0 0 14px 0;line-height:1.75;font-size:16px;">
-        When the controller is based on PID ideas, it needs not only the current error, but also information about how the error accumulates over time (the integral part) and how fast it changes (the derivative part). In a sampled-data system, integrals and derivatives cannot be used directly in their continuous forms, so we approximate them numerically using the sampled error values. For example, the derivative of (\(e(t)\)) over one sampling interval can be approximated by the difference between two consecutive samples divided by the sampling period, (\((e_k-e_{k-1})/T\)). Similarly, the integral of the error can be approximated by numerical integration methods such as the trapezoidal rule, which turns continuous accumulation into a discrete update that depends on recent samples. These approximations convert the PID control law into a discrete-time computation that a processor can execute at every sampling instant.
-      </p>
+        <p>In a real digital implementation, however, the controller does not continuously see (\(r(t)\)) and (\(y(t)\)). Instead, it receives sampled values every (\(T\)) time units. At times (\(t=kT\)), analog-to-digital conversion produces the discrete values (\(r_k\)) and (\(y_k\)), and the sampled error becomes (\(e_k=r_k-y_k\)). This is the key shift from a continuous-time description to a sampled-data description: the controller now operates on sequences (\(\{r_k\}\)), (\(\{y_k\}\)), and (\(\{e_k\}\)) rather than continuous signals.</p>
 
-      <p style="margin:0 0 10px 0;line-height:1.75;font-size:16px;">
-        With one common discretization approach, the controller output can be written as an incremental difference equation. The book gives the following form for the k-th computed output:
-      </p>
+        <p>When the controller is based on PID ideas, it needs not only the current error, but also information about how the error accumulates over time (the integral part) and how fast it changes (the derivative part). In a sampled-data system, integrals and derivatives cannot be used directly in their continuous forms, so we approximate them numerically using the sampled error values. For example, the derivative of (\(e(t)\)) over one sampling interval can be approximated by the difference between two consecutive samples divided by the sampling period, (\((e_k-e_{k-1})/T\)). Similarly, the integral of the error can be approximated by numerical integration methods such as the trapezoidal rule, which turns continuous accumulation into a discrete update that depends on recent samples. These approximations convert the PID control law into a discrete-time computation that a processor can execute at every sampling instant.</p>
 
-      <div style="margin:14px 0 18px 0;border:1px solid #e8e8ef;border-radius:12px;background:#fafbff;padding:14px 14px;overflow-x:auto;">
-        \[
-          u_k = u_{k-2} + \alpha e_k + \beta e_{k-1} + \gamma e_{k-2}.
-        \]
-      </div>
+        <p>With one common discretization approach, the controller output can be written as an incremental difference equation. The book gives the following form for the k-th computed output:</p>
 
-      <p style="margin:0 0 14px 0;line-height:1.75;font-size:16px;">
-        Here, (\(u_k\)) is the digital control output at sample (\(k\)), and (\(\alpha\)), (\(\beta\)), and (\(\gamma\)) are proportional constants chosen at design time (they depend on how the PID terms are discretized and tuned). The important practical point is that this computation is extremely lightweight: it only requires a few arithmetic operations using stored past values of the error and output. That is why it is well suited for real-time execution, where predictability and bounded computation time matter.
-      </p>
+        <div class="math-block">
+            \[
+              u_k = u_{k-2} + \alpha e_k + \beta e_{k-1} + \gamma e_{k-2}.
+            \]
+        </div>
 
-      <p style="margin:0 0 14px 0;line-height:1.75;font-size:16px;">
-        This equation also makes the feedback nature of control very clear. The current output (\(u_k\)) depends on current and past measured values because the error (\(e_k\)) is computed from (\(r_k\)) and (\(y_k\)). But the future measured output (\(y_{k+1}, y_{k+2},\dots\)) depends on what the controller does now, because the plant responds to the actuator input generated from (\(u_k\)). This circular dependency is exactly why we call it a feedback control loop, or simply a loop: measurements influence control actions, and control actions influence future measurements.
-      </p>
+        <p>Here, (\(u_k\)) is the digital control output at sample (\(k\)), and (\(\alpha\)), (\(\beta\)), and (\(\gamma\)) are proportional constants chosen at design time (they depend on how the PID terms are discretized and tuned). The important practical point is that this computation is extremely lightweight: it only requires a few arithmetic operations using stored past values of the error and output. That is why it is well suited for real-time execution, where predictability and bounded computation time matter.</p>
 
-      <p style="margin:0;line-height:1.75;font-size:16px;">
-        In a real-time system, this loop is typically implemented with a periodic timer. The system sets a timer to generate an interrupt every (\(T\)) time units. At each interrupt, it performs A/D conversion to obtain the latest sensor measurement, computes the new control output using the discrete control law, and then outputs the command—often converting it back to an analog signal through D/A conversion so the actuator can use it. Once configured, the timer continues producing interrupts at that period until the setting is canceled, which means the controller runs as a permanent periodic task, repeating the sense–compute–actuate cycle indefinitely.
-      </p>
+        <p>This equation also makes the feedback nature of control very clear. The current output (\(u_k\)) depends on current and past measured values because the error (\(e_k\)) is computed from (\(r_k\)) and (\(y_k\)). But the future measured output (\(y_{k+1}, y_{k+2},\dots\)) depends on what the controller does now, because the plant responds to the actuator input generated from (\(u_k\)). This circular dependency is exactly why we call it a feedback control loop, or simply a loop: measurements influence control actions, and control actions influence future measurements.</p>
 
-    </article>
-  </main>
+        <p>In a real-time system, this loop is typically implemented with a periodic timer. The system sets a timer to generate an interrupt every (\(T\)) time units. At each interrupt, it performs A/D conversion to obtain the latest sensor measurement, computes the new control output using the discrete control law, and then outputs the command—often converting it back to an analog signal through D/A conversion so the actuator can use it. Once configured, the timer continues producing interrupts at that period until the setting is canceled, which means the controller runs as a permanent periodic task, repeating the sense–compute–actuate cycle indefinitely.</p>
+    </div>
+
+    <!-- Chapter Navigation Footer -->
+    <div class="chapter-footer">
+        <div class="chapter-footer-content">
+            <div class="chapter-nav-buttons">
+                <a href="index.html" class="nav-button disabled">← Previous</a>
+                <a href="index.html" class="nav-button">All Chapters</a>
+                <a href="part2.html" class="nav-button">Next →</a>
+            </div>
+            <div class="chapter-footer-copyright">
+                <p>© Real-Time Systems — 2026</p>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
